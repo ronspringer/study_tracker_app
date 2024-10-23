@@ -1,0 +1,22 @@
+# Python specific
+*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+
+# Django specific
+db.sqlite3
+/media/
+/staticfiles/
+
+/# Ignore sensitive config files
+/config/settings/secrets.py
+
+# Ignore .env files
+.env
+
+# Ignore IDE settings
+.vscode/
+.idea/
