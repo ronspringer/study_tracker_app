@@ -8,6 +8,11 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import CreateStudySession from './CreateStudySession'; // Import the CreateStudySession form
 import EditStudySession from './EditStudySession';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+Dayjs.extend(utc);
+Dayjs.extend(timezone);
 
 const StudySession = ({ subjectId }) => {
   const [myData, setMydata] = useState();
@@ -16,6 +21,7 @@ const StudySession = ({ subjectId }) => {
   const [editSessionData, setEditSessionData] = useState(null); // State to track the session being edited
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // State for delete confirmation dialog
   const [sessionToDelete, setSessionToDelete] = useState(null); // Track the session to be deleted
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const GetData = () => {
     AxiosInstance.get(`studysession/`, {
@@ -38,7 +44,7 @@ const StudySession = ({ subjectId }) => {
       //   size: 150,
       // },
       {
-        accessorFn: (row) => Dayjs(row.session_date).format('DD-MM-YYYY'),
+        accessorFn: (row) => Dayjs.utc(row.session_date).tz(userTimeZone).format('YYYY-MM-DD HH:mm'),
         header: 'Session Date',
         size: 150,
       },

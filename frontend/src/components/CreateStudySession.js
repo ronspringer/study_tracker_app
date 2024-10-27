@@ -1,6 +1,5 @@
 import { React, useEffect, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import MyDatePickerField from './forms/MyDatePickerField'
 import MyTextField from './forms/MyTextField'
 import MyMultiLineField from './forms/MyMultiLineField'
 import { useForm } from 'react-hook-form'
@@ -9,6 +8,7 @@ import Dayjs from 'dayjs'
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import MySelectField from './forms/MySelectField'
+import MyDateTimePickerField from './forms/MyDateTimePickerField'
 
 const CreateStudySession = ({ subjectId, onClose }) => { // Receive subjectId and onClose prop
     const [subject,setSubject] = useState()
@@ -42,7 +42,7 @@ const CreateStudySession = ({ subjectId, onClose }) => { // Receive subjectId an
     const { handleSubmit, control } = useForm({defaultValues:defaultValues, resolver: yupResolver(schema)});
     const submission = (data) => 
     {
-        const session_date = Dayjs(data.session_date["$d"]).format('YYYY-MM-DD')
+        const session_date = Dayjs(data.session_date["$d"]).format('YYYY-MM-DD HH:mm')
         AxiosInstance.post(`studysession/`,{
           duration_minutes: data.duration_minutes,
           notes: data.notes,
@@ -79,8 +79,8 @@ const CreateStudySession = ({ subjectId, onClose }) => { // Receive subjectId an
                 defaultValue={subjectId} // Default value for the subject
                 helperText="Please select subject"
           />
-          <MyDatePickerField
-            label="Session Date"
+          <MyDateTimePickerField
+            label="Session Date & Time"
             name="session_date"
             control={control}
             width={'24%'}

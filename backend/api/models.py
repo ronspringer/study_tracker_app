@@ -12,7 +12,7 @@ class Subject(models.Model):
 
 class StudySession(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    session_date = models.DateField()
+    session_date = models.DateTimeField()
     duration_minutes = models.PositiveIntegerField()  # duration in minutes
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

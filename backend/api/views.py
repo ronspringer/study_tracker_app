@@ -4,13 +4,13 @@ from rest_framework.response import Response
 from .models import *
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .tensorflow_utils import get_study_data, preprocess_data, train_model, generate_study_tip, save_study_tip
+from .tensorflow_utils import get_study_data, preprocess_data, train_model, generate_study_tip
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-import traceback
-import numpy as np
+from django.utils import timezone
+from datetime import datetime
+
 
 class SubjectViewset(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]  # Ensure the user is authenticated to view subjects
@@ -96,45 +96,6 @@ class StudySessionViewset(viewsets.ViewSet):
         studysession.delete()
         return Response(status=204)
     
-    # Generate study tip method (Inside the class, outside specific actions)
-    def generate_study_tip(self, model, subject_id, duration_minutes, total_minutes_studied):
-        try:
-            # Convert subject_id to integer
-            subject_id = int(subject_id)
-            
-            # Convert duration_minutes and total_minutes_studied to floats
-            duration_minutes = float(duration_minutes)
-            total_minutes_studied = float(total_minutes_studied)
-
-            # Create the input array with the correct data types
-            input_data = np.array([[subject_id, duration_minutes, total_minutes_studied]], dtype=np.float32)
-            print(f"Input data for prediction: {input_data}")  # Debugging line
-            
-            # Ensure the input data has the correct shape
-            if input_data.ndim == 1:
-                input_data = input_data.reshape(1, -1)  # Reshape to (1, n_features) if it's 1D
-
-            # Make prediction
-            prediction = model.predict(input_data)
-            print(f"Prediction: {prediction}")  # Debugging line
-
-            # Access the prediction value safely
-            prediction_value = prediction[0][0] if prediction.size > 0 else None
-
-            if prediction_value is None:
-                raise ValueError("No prediction value returned.")
-
-            # Provide feedback based on the prediction value
-            if prediction_value < 30:
-                return "Consider increasing your study duration to improve focus."
-            elif prediction_value > 60:
-                return "You are studying for a long time. Take regular breaks to avoid burnout."
-            else:
-                return "Keep up your current study pace!"
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            traceback.print_exc()  # This will show the full traceback
-    
     # Action to get study suggestion
     @action(detail=True, methods=['get'], url_path='get_study_suggestion')
     def get_study_suggestion(self, request, pk=None):
@@ -142,46 +103,43 @@ class StudySessionViewset(viewsets.ViewSet):
             user = request.user
             if user.is_anonymous:
                 return JsonResponse({"error": "Authentication required."}, status=401)
+            
+            sessions, progress = get_study_data(user)  # Fetch raw study data
+            data = preprocess_data(sessions, progress)  # Process data for model training
 
-            # Fetching study data
-            sessions, progress = get_study_data(user)
-            print(f"Sessions: {sessions}, Progress: {progress}")
+            # Fetch the specified subject instance
+            subject = Subject.objects.get(pk=pk)
 
-            # Preprocess data
-            data = preprocess_data(sessions, progress)
-            print(f"Preprocessed data: {data}")
+            # Fetch all study sessions for the subject
+            sessions = StudySession.objects.filter(subject=subject).values('session_date', 'duration_minutes')
+            print(f"Sessions for {subject.subject_name}: {sessions}")
 
-            # Calculate total duration and minutes studied
+            # Total duration for the subject's study sessions
             duration_minutes = sum(session['duration_minutes'] for session in sessions)
-            total_minutes_studied = sum(
-                progress.filter(subject_id=session['subject_id']).values_list('total_minutes_studied', flat=True).first() or 0 
-                for session in sessions
-            )
 
-            # Train the model
-            model = train_model(data)
+            # Fetch total study time from progress for the subject
+            progress = Progress.objects.filter(subject=subject).first()
+            total_minutes_studied = progress.total_minutes_studied if progress else 0
+
+            # Determine session time for each session (you can adjust this based on need)
+            # Example: Using the latest session's time or an average time
+            if sessions:
+                latest_session_date = max(session['session_date'] for session in sessions)
+                session_time = latest_session_date  # Adjust to your actual datetime format
+            else:
+                session_time = datetime.datetime.now()  # Default to current time if no sessions
+
+            # Load or train model
+            model = train_model(data)  # Use pre-trained or dynamic training based on data
 
             # Generate a suggestion with all required parameters
-            suggestion = self.generate_study_tip(model, pk, duration_minutes, total_minutes_studied)
-            
-            
-            subject = Subject.objects.get(pk=pk)  # Fetch the Subject instance
-            study_tip = StudyTip.objects.create(
-                suggestion=suggestion,
-                subject=subject  # Associate it with the subject
-            )
-            study_tip.save()
+            suggestion = generate_study_tip(model, user, subject, duration_minutes, total_minutes_studied, session_time)
 
             return JsonResponse({"suggestion": suggestion})
 
         except Exception as e:
             print(f"Error occurred: {str(e)}")
             return JsonResponse({"error": "Internal server error."}, status=500)
-
-
-
-
-
 
 class ProgressViewset(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -235,7 +193,6 @@ class ProgressViewset(viewsets.ViewSet):
             return Response(status=204)
         except Progress.DoesNotExist:
             return Response({'error': 'Progress not found'}, status=404)
-
 
 class StudyTipViewset(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]

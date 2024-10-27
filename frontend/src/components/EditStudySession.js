@@ -1,13 +1,17 @@
 import { React, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import MyDatePickerField from './forms/MyDatePickerField';
 import MyTextField from './forms/MyTextField';
 import MyMultiLineField from './forms/MyMultiLineField';
+import MyDateTimePickerField from './forms/MyDateTimePickerField';
 import { useForm } from 'react-hook-form';
 import AxiosInstance from './Axios';
 import Dayjs from 'dayjs';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+Dayjs.extend(utc);
+Dayjs.extend(timezone);
 
 const EditStudySession = ({ sessionData, onClose }) => {
   const defaultValues = {
@@ -37,7 +41,7 @@ const EditStudySession = ({ sessionData, onClose }) => {
   }, [sessionData, setValue]);
 
   const submission = (data) => {
-    const formattedSessionDate = Dayjs(data.session_date).format('YYYY-MM-DD'); // Format the selected session date
+    const formattedSessionDate = Dayjs(data.session_date).format('YYYY-MM-DD HH:mm'); // Format the selected session date
   
     AxiosInstance.put(`studysession/${sessionData.id}/`, {
       duration_minutes: data.duration_minutes,
@@ -62,7 +66,8 @@ const EditStudySession = ({ sessionData, onClose }) => {
       </Box>
       <Box sx={{ display: 'flex', width: '100%', boxShadow: 3, padding: 4, flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-          <MyDatePickerField label="Session Date" name="session_date" control={control} width={'33%'} />
+          {/* <MyDatePickerField label="Session Date" name="session_date" control={control} width={'33%'} /> */}
+          <MyDateTimePickerField label="Session Date & Time" name="session_date" control={control} width={'33%'}  />
           <MyTextField label="Duration" name="duration_minutes" control={control} placeholder="Enter duration of study in minutes" width={'33%'} />
           <MyMultiLineField label="Notes" name="notes" control={control} placeholder="Enter notes of study" width={'33%'} />
         </Box>
