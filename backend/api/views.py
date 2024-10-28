@@ -103,37 +103,34 @@ class StudySessionViewset(viewsets.ViewSet):
             user = request.user
             if user.is_anonymous:
                 return JsonResponse({"error": "Authentication required."}, status=401)
-            
-            sessions, progress = get_study_data(user)  # Fetch raw study data
-            data = preprocess_data(sessions, progress)  # Process data for model training
 
-            # Fetch the specified subject instance
+            # Fetch study data and preprocess it
+            sessions, progress = get_study_data(user)
+            data = preprocess_data(sessions, progress)
+
+            # Get the specified subject instance
             subject = Subject.objects.get(pk=pk)
 
             # Fetch all study sessions for the subject
             sessions = StudySession.objects.filter(subject=subject).values('session_date', 'duration_minutes')
-            print(f"Sessions for {subject.subject_name}: {sessions}")
-
-            # Total duration for the subject's study sessions
             duration_minutes = sum(session['duration_minutes'] for session in sessions)
 
-            # Fetch total study time from progress for the subject
+            # Get total study time from progress for the subject
             progress = Progress.objects.filter(subject=subject).first()
             total_minutes_studied = progress.total_minutes_studied if progress else 0
 
-            # Determine session time for each session (you can adjust this based on need)
-            # Example: Using the latest session's time or an average time
+            # Determine session time (latest or average session time)
             if sessions:
                 latest_session_date = max(session['session_date'] for session in sessions)
-                session_time = latest_session_date  # Adjust to your actual datetime format
+                session_time = latest_session_date
             else:
-                session_time = datetime.datetime.now()  # Default to current time if no sessions
+                session_time = datetime.now()  # Default to current time if no sessions
 
             # Load or train model
-            model = train_model(data)  # Use pre-trained or dynamic training based on data
+            model = train_model(data)  # Ensure model is trained on relevant data
 
-            # Generate a suggestion with all required parameters
-            suggestion = generate_study_tip(model, user, subject, duration_minutes, total_minutes_studied, session_time)
+            # Generate suggestions
+            suggestion = generate_study_tip(model, subject, duration_minutes, total_minutes_studied, session_time)
 
             return JsonResponse({"suggestion": suggestion})
 
