@@ -12,6 +12,8 @@ import Register from './components/Register';
 import ProtectedLayout from './components/ProtectedLayout'; // Import the new layout component
 import { AuthContext } from './components/AuthContext';
 import React, { useContext } from 'react';
+import EditUserProfile from './components/EditUserProfile';
+import User from './components/User';
 
 function App() {
   const { isAuthenticated } = useContext(AuthContext);
@@ -33,6 +35,8 @@ function App() {
           <Route path="/studytip" element={isAuthenticated ? <StudyTip/> : <Navigate to="/login" />} />
           <Route path="/createsubject" element={isAuthenticated ? <CreateSubject/> : <Navigate to="/login" />} />
           <Route path="subject/editsubject/:id" element={isAuthenticated ? <EditSubject/> : <Navigate to="/login" />} />
+          <Route path="/userprofile/:id" element={isAuthenticated ? <EditUserProfile /> : <Navigate to="/login" />} />
+          <Route path="/userprofile" element={isAuthenticated ? <User/> : <Navigate to="/login" />} />
         </Route>
       </Routes>
     </div>

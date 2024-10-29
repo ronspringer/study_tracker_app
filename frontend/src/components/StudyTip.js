@@ -46,7 +46,7 @@ const StudyTip = ({ subjectId }) => { // Accept subjectId as a prop
     [],
   );
 
-  const handleOpenDialog = () => setOpenDialog(true);
+  //const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditTipData(null); // Reset after closing

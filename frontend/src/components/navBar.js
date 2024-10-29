@@ -28,15 +28,17 @@ export default function Navbar(props) {
             <CssBaseline />
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button color='inherit' component={Link} to={`/`}>
                     <Typography variant="h6" noWrap component="div">
                         Study Tracker
                     </Typography>
+                    </Button>
 
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {user && (
-                            <Typography variant="body1" sx={{ marginRight: 2, textTransform: 'uppercase' }}>
-                                {user.username}
-                            </Typography>
+                            <Button color='inherit' component={Link} to={`/userprofile/${user.id}`}>
+                                User Profile
+                            </Button>
                         )}
                         <Button color="inherit" onClick={logout}>
                             Logout
@@ -73,6 +75,16 @@ export default function Navbar(props) {
                                 <ListItemText primary={"Subject"} />
                             </ListItemButton>
                         </ListItem>
+                        {user && user.is_superuser && ( // Explicitly check if is_superuser is 1
+                        <ListItem disablePadding>
+                            <ListItemButton component={Link} to="/userprofile" selected={"/userprofile" === path}>
+                                <ListItemIcon>
+                                    <BookIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={"Manage Users"} />
+                            </ListItemButton>
+                        </ListItem>
+                        )}
                     </List>
                 </Box>
             </Drawer>

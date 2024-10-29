@@ -55,4 +55,21 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'is_superuser')
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ['id','username', 'first_name', 'last_name', 'email', 'password']
+
+    def update(self, instance, validated_data):
+        # Check if a password is provided and update it
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)  # Hash the password
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

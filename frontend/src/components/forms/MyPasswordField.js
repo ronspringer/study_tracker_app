@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import { Controller } from 'react-hook-form';
 
 export default function MyPasswordField(props) {
-  const { label, width, placeholder, name, control, hidden = false } = props;
+  const { label, width, placeholder, marginBottom, marginTop, name, control, hidden = false } = props;
 
   return (
     <Controller
@@ -11,7 +11,7 @@ export default function MyPasswordField(props) {
       control={control}  // control from useForm
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <TextField
-          sx={{ width }}
+          sx={{ width, marginBottom, marginTop }}
           label={hidden ? '' : label}
           variant="outlined"
           placeholder={hidden ? '' : placeholder}

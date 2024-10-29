@@ -267,3 +267,21 @@ class LoginView(viewsets.ViewSet):
     def retrieve(self, request):
         # You can return a login form or just a message.
         return Response({"message": "Please send a POST request to login."})
+    
+
+class UserProfileViewset(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()  # Get user by ID from the URL
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()  # Get user by ID from the URL
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
