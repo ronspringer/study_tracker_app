@@ -26,7 +26,6 @@ from django.dispatch import receiver  # Decorator to connect signal handlers to 
 from .models import StudySession, Progress  # Import StudySession and Progress models from current app
 from django.db import models  # Import Django models module for database-related functions
 
-# Signal handler that updates the Progress model whenever a StudySession instance is saved
 @receiver(post_save, sender=StudySession)
 def update_progress(sender, instance, **kwargs):
     # Get the subject related to the current StudySession instance
@@ -37,14 +36,11 @@ def update_progress(sender, instance, **kwargs):
 
     # Calculate the total minutes studied for the subject by aggregating durations from all sessions
     total_minutes = StudySession.objects.filter(subject=subject).aggregate(total=models.Sum('duration_minutes'))['total']
-    # Update the total_minutes_studied field in Progress (set to 0 if there are no sessions)
     progress.total_minutes_studied = total_minutes if total_minutes else 0
 
-    # Find the most recent session date for the subject by ordering StudySessions
+    # Find the most recent session date for the subject
     last_session = StudySession.objects.filter(subject=subject).order_by('-session_date').first()
-    # Update the last_session_date field in Progress with the date of the latest session, if it exists
     if last_session:
         progress.last_session_date = last_session.session_date
 
-    # Save the updated Progress instance
     progress.save()

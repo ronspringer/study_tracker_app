@@ -100,7 +100,7 @@ def build_model(input_shape):
     # Compile the model with categorical crossentropy loss and accuracy metrics for each output
     model.compile(optimizer='adam',
                   loss={
-                      'duration_suggestion': ' ',
+                      'duration_suggestion': 'categorical_crossentropy',
                       'focus_suggestion': 'categorical_crossentropy',
                       'time_feedback': 'categorical_crossentropy'
                   },
