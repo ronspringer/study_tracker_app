@@ -1,76 +1,80 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Box, Button, Typography, Tabs, Tab } from '@mui/material';
-import MyTextField from './forms/MyTextField';
-import { useForm } from 'react-hook-form';
-import AxiosInstance from './Axios';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import StudySession from './StudySession';  
-import StudyProgress from './StudyProgress';
-import StudyTip from './StudyTip';
-import { AuthContext } from './AuthContext';  // Assuming you have an AuthContext for user data
+import React, { useEffect, useState, useContext } from 'react';  // Import React and necessary hooks
+import { Box, Button, Typography, Tabs, Tab } from '@mui/material';  // Import MUI components
+import MyTextField from './forms/MyTextField';  // Import custom text field component
+import { useForm } from 'react-hook-form';  // Import useForm hook from react-hook-form
+import AxiosInstance from './Axios';  // Import the Axios instance for API calls
+import { useNavigate, useParams, Link } from 'react-router-dom';  // Import routing hooks
+import StudySession from './StudySession';  // Import StudySession component
+import StudyProgress from './StudyProgress';  // Import StudyProgress component
+import StudyTip from './StudyTip';  // Import StudyTip component
+import { AuthContext } from './AuthContext';  // Import AuthContext for user data
 
+// Define the EditSubject component
 const EditSubject = () => {
-  const { id: MyId } = useParams();  // Destructured directly from useParams
-  const navigate = useNavigate();
-  
+  const { id: MyId } = useParams();  // Get the subject ID from the URL parameters
+  const navigate = useNavigate();  // Hook for programmatic navigation
+
   const { user } = useContext(AuthContext);  // Fetch the authenticated user from context
 
-  // State to manage tab navigation
+  // State to manage active tab navigation
   const [activeTab, setActiveTab] = useState(0);
   
   // State to track whether subject data has been loaded
   const [subjectLoaded, setSubjectLoaded] = useState(false);
 
+  // Set default values for the form
   const defaultValues = {
-    subject_name: '',
+    subject_name: '',  // Initialize with an empty subject name
     user: user?.id || null,  // Dynamically set the user ID from the authenticated session
   };
 
+  // Initialize the useForm hook with default values
   const { handleSubmit, setValue, control } = useForm({
     defaultValues: defaultValues,
   });
 
   // Function to get subject data based on the ID
   const GetData = () => {
-    AxiosInstance.get(`subject/${MyId}`)
+    AxiosInstance.get(`subject/${MyId}`)  // Fetch subject data by ID
       .then((res) => {
         console.log('Fetched data:', res.data);
-        setValue('subject_name', res.data.subject_name);  // Populate form with fetched data
+        setValue('subject_name', res.data.subject_name);  // Populate form with fetched subject name
         setSubjectLoaded(true);  // Subject data loaded successfully
       })
       .catch((error) => {
-        console.log('Error fetching data:', error);
+        console.log('Error fetching data:', error);  // Log any errors encountered
       });
   };
 
   // Fetch data when the component mounts
   useEffect(() => {
-    GetData();
-  }, [MyId]);  // Add MyId as a dependency to run when ID changes
+    GetData();  // Call GetData to fetch subject details
+  }, [MyId]);  // Dependency array ensures effect runs when ID changes
 
   // Function to handle form submission
   const submission = (data) => {
-    AxiosInstance.put(`subject/${MyId}/`, {
-      subject_name: data.subject_name,
+    AxiosInstance.put(`subject/${MyId}/`, {  // Send PUT request to update the subject
+      subject_name: data.subject_name,  // Subject name from form data
       user: user?.id,  // Ensure the user ID is passed dynamically
     })
       .then((response) => {
-        console.log('Success:', response.data);
-        navigate('/subject');  // Navigate to the subject list or another appropriate page after submission
+        console.log('Success:', response.data);  // Log success response
+        navigate('/subject');  // Navigate to the subject list after submission
       })
       .catch((error) => {
-        console.log('Error:', error.response.data);  // Log any errors
+        console.log('Error:', error.response.data);  // Log any errors encountered
       });
   };
 
   // Function to handle tab change
   const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+    setActiveTab(newValue);  // Update the active tab state
   };
 
+  // Render the component
   return (
     <div>
-      <form onSubmit={handleSubmit(submission)}>
+      <form onSubmit={handleSubmit(submission)}>  {/* Handle form submission */}
         <Box sx={{ display: 'flex', width: '100%', backgroundColor: '#00003f', marginBottom: '10px', padding: '10px' }}>
           <Typography sx={{ marginLeft: '20px', color: '#fff' }}>
             Edit Subject
@@ -107,16 +111,16 @@ const EditSubject = () => {
       {subjectLoaded && (
         <>
           <Tabs value={activeTab} onChange={handleTabChange} centered>
-            <Tab label="Study Session" />
-            <Tab label="Study Progress" />
-            <Tab label="Study Tips" />
+            <Tab label="Study Session" />  {/* Tab for Study Sessions */}
+            <Tab label="Study Progress" />  {/* Tab for Study Progress */}
+            <Tab label="Study Tips" />  {/* Tab for Study Tips */}
           </Tabs>
 
           {/* Conditionally render tab content */}
           <Box sx={{ marginTop: '20px' }}>
-            {activeTab === 0 && <StudySession subjectId={MyId} />}  {/* Pass subject ID */}
-            {activeTab === 1 && <StudyProgress subjectId={MyId} />}  {/* Pass subject ID */}
-            {activeTab === 2 && <StudyTip subjectId={MyId} />}  {/* Pass subject ID */}
+            {activeTab === 0 && <StudySession subjectId={MyId} />}  {/* Render StudySession component */}
+            {activeTab === 1 && <StudyProgress subjectId={MyId} />}  {/* Render StudyProgress component */}
+            {activeTab === 2 && <StudyTip subjectId={MyId} />}  {/* Render StudyTip component */}
           </Box>
         </>
       )}
@@ -124,4 +128,4 @@ const EditSubject = () => {
   );
 };
 
-export default EditSubject;
+export default EditSubject;  // Export the EditSubject component

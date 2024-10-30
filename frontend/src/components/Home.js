@@ -1,12 +1,14 @@
-import React from 'react'
-import Dashboard from './Dashboard'
+import React from 'react';  // Import React library
+import Dashboard from './Dashboard';  // Import the Dashboard component
 
+// Define the Home component
 const Home = () => {
   return (
-    <div>
-      <Dashboard/>
+    <div>  {/* Main wrapper for the component */}
+      <Dashboard/>  {/* Render the Dashboard component inside Home */}
     </div>
-  )
+  );
 }
 
-export default Home
+// Export the Home component as default
+export default Home;

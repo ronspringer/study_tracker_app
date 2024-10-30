@@ -1,18 +1,21 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Navbar from './navBar';
+import React from 'react'; // Import React
+import { Outlet } from 'react-router-dom'; // Import Outlet for rendering nested routes
+import Navbar from './navBar'; // Import the Navbar component
 
+// Define the ProtectedLayout component
 const ProtectedLayout = () => {
-    const myWidth = 180;
+    const myWidth = 180; // Set the width for the Navbar drawer
 
     return (
-        <div style={{ display: 'flex' }}>
-            <Navbar drawerWidth={myWidth} />
+        <div style={{ display: 'flex' }}> {/* Flexbox container for layout */}
+            <Navbar drawerWidth={myWidth} /> {/* Render the Navbar with specified width */}
             <div style={{ marginTop: '5%', marginRight: '5%', width: '100%' }}>
-                <Outlet /> {/* This renders the nested routes here */}
+                {/* The Outlet component is used to render the nested routes */}
+                <Outlet /> 
             </div>
         </div>
     );
 };
 
+// Export the ProtectedLayout component as the default export
 export default ProtectedLayout;

@@ -18,32 +18,35 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# List of installed applications for the Django project
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'corsheaders',
-    'api'
+    'django.contrib.admin',         # Django's admin interface
+    'django.contrib.auth',          # Authentication system
+    'django.contrib.contenttypes',  # Content type framework
+    'django.contrib.sessions',       # Session framework
+    'django.contrib.messages',       # Messaging framework
+    'django.contrib.staticfiles',    # Static files management
+    'rest_framework',               # Django REST Framework
+    'rest_framework_simplejwt',     # JWT authentication for REST Framework
+    'corsheaders',                  # Middleware for handling CORS
+    'api'                           # Custom application for API logic
 ]
 
+# Middleware configuration for the Django project
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS middleware to handle cross-origin requests
+    'django.middleware.security.SecurityMiddleware',  # Middleware for security enhancements
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Middleware for session management
+    'django.middleware.common.CommonMiddleware',  # Common middleware for various functionalities
+    'django.middleware.csrf.CsrfViewMiddleware',  # Middleware for Cross-Site Request Forgery protection
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # Middleware for user authentication
+    'django.contrib.messages.middleware.MessageMiddleware',  # Middleware for temporary messages
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # Middleware to prevent clickjacking attacks
 ]
 
+# List of allowed origins for CORS (Cross-Origin Resource Sharing)
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000'
+    'http://localhost:3000'  # Allow requests from this origin
 ]
 
 ROOT_URLCONF = 'crud.urls'
@@ -119,18 +122,20 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
     ),
 }
 
 from datetime import timedelta
 
+# JWT settings for the application
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Access token lifetime set to 5 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh token lifetime set to 1 day
+    'ROTATE_REFRESH_TOKENS': True,                    # Enable token rotation
+    'BLACKLIST_AFTER_ROTATION': True,                  # Blacklist the old refresh token after rotation
+    'AUTH_HEADER_TYPES': ('Bearer',),                  # Specify the authentication header type
 }

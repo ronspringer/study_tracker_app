@@ -1,110 +1,108 @@
-import {React, useEffect, useMemo, useState} from 'react'
-import AxiosInstance from './Axios'
-import { Box, IconButton, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
-import { MaterialReactTable } from 'material-react-table';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { React, useEffect, useMemo, useState } from 'react'; // Import React and necessary hooks
+import AxiosInstance from './Axios'; // Import Axios instance for API requests
+import { Box, IconButton, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'; // Import Material-UI components
+import { MaterialReactTable } from 'material-react-table'; // Import Material React Table for displaying data
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'; // Import icons for edit and delete actions
 import CreateStudyTip from './CreateStudyTip'; // Import the CreateStudyTip form
-import EditStudyTip from './EditStudyTip';
-  
+import EditStudyTip from './EditStudyTip'; // Import the EditStudyTip form
 
-const StudyTip = ({ subjectId }) => { // Accept subjectId as a prop
-    
-    const [myData,setMydata] = useState()
-    const [loading,setLoading] = useState(true)
-    const [openDialog, setOpenDialog] = useState(false); // State to manage the dialog open/close
-    const [editTipData, setEditTipData] = useState(null); // State to track the Tip being edited
-    const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // State for delete confirmation dialog
-    const [tipToDelete, setTipToDelete] = useState(null); // Track the tip to be deleted
+// Define the StudyTip component, receiving subjectId as a prop
+const StudyTip = ({ subjectId }) => {
+  const [myData, setMydata] = useState(); // State to hold fetched data
+  const [loading, setLoading] = useState(true); // State to manage loading state
+  const [openDialog, setOpenDialog] = useState(false); // State to control the dialog for create/edit
+  const [editTipData, setEditTipData] = useState(null); // State to track the tip being edited
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // State for delete confirmation dialog
+  const [tipToDelete, setTipToDelete] = useState(null); // Track the tip to be deleted
 
-    const GetData = () => {
-        AxiosInstance.get(`studytip/`, {
-          params: { subject: subjectId } // Pass the subjectId as a filter to the backend
-        }).then((res) => {
-            setMydata(res.data)
-            console.log(res.data)
-            setLoading(false)
-          })
-    }
-    useEffect(()=> {
-        GetData();
-    },[subjectId]); // Re-fetch data if subjectId changes
-
-
-  const columns = useMemo(
-    () => [
-      // {
-      //   accessorKey: 'subject', //access nested data with dot notation
-      //   header: 'Subject',
-      //   size: 150,
-      // },
-      {
-        accessorKey: 'suggestion',
-        header: 'Suggestion',
-        size: 150,
-      },
-    ],
-    [],
-  );
-
-  //const handleOpenDialog = () => setOpenDialog(true);
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditTipData(null); // Reset after closing
-    GetData();
+  // Function to fetch data from the API
+  const GetData = () => {
+    AxiosInstance.get(`studytip/`, {
+      params: { subject: subjectId } // Pass the subjectId as a parameter for filtering
+    }).then((res) => {
+      setMydata(res.data); // Update state with fetched data
+      console.log(res.data); // Log the fetched data
+      setLoading(false); // Set loading to false once data is fetched
+    });
   };
 
+  // useEffect hook to fetch data when the component mounts or when subjectId changes
+  useEffect(() => {
+    GetData();
+  }, [subjectId]);
+
+  // Define columns for the MaterialReactTable
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: 'suggestion', // Accessor for the suggestion field
+        header: 'Suggestion', // Column header
+        size: 150, // Column size
+      },
+    ],
+    []
+  );
+
+  // Function to close the create/edit dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close the dialog
+    setEditTipData(null); // Reset edit tip data
+    GetData(); // Refresh data after closing
+  };
+
+  // Function to handle the click event for editing a study tip
   const handleEditClick = (row) => {
     setEditTipData(row.original); // Set the tip data for editing
     setOpenDialog(true); // Open the dialog
   };
 
+  // Function to open the delete confirmation dialog
   const handleOpenConfirmDialog = (row) => {
     setTipToDelete(row.original); // Set the tip data for deletion
     setOpenConfirmDialog(true); // Open confirmation dialog
   };
 
+  // Function to close the delete confirmation dialog
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false); // Close confirmation dialog
     setTipToDelete(null); // Reset tip to delete
   };
 
-
+  // Function to handle deletion of a study tip
   const handleDeleteTip = () => {
-    AxiosInstance.delete(`studytip/${tipToDelete.id}/`)
+    AxiosInstance.delete(`studytip/${tipToDelete.id}/`) // Delete request to API
       .then((response) => {
-        console.log('Deleted:', response.data);
+        console.log('Deleted:', response.data); // Log the response
         GetData(); // Refresh data after deletion
       })
       .catch((error) => {
-        console.log('Error:', error.response.data);
+        console.log('Error:', error.response.data); // Log any error response
       })
       .finally(() => {
-        handleCloseConfirmDialog(); // Close dialog after deletion
+        handleCloseConfirmDialog(); // Close confirmation dialog after deletion
       });
   };
 
+  // Function to generate a new study suggestion
   const handleGenerateSuggestion = async () => {
     try {
-        const response = await AxiosInstance.get(`studysession/${subjectId}/get_study_suggestion/`);
-        console.log('Suggestion generated:', response.data.suggestion);
-        // Optionally refresh the StudyTip data or display the suggestion
-        GetData();
+      const response = await AxiosInstance.get(`studysession/${subjectId}/get_study_suggestion/`); // Fetch a new study suggestion
+      console.log('Suggestion generated:', response.data.suggestion); // Log the generated suggestion
+      // Optionally refresh the StudyTip data or display the suggestion
+      GetData(); // Refresh the study tips data
     } catch (error) {
-        console.error('Error generating suggestion:', error);
+      console.error('Error generating suggestion:', error); // Log any error that occurs
     }
   };
 
-
-
   return (
     <div>
-        {/* Add Subject Button */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+      {/* Button to generate a new study suggestion */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button
           variant="contained"
           color="primary"
-          //onClick={handleOpenDialog}
-          onClick={handleGenerateSuggestion}
+          onClick={handleGenerateSuggestion} // Trigger suggestion generation on click
         >
           Generate Suggestion
         </Button>
@@ -114,11 +112,11 @@ const StudyTip = ({ subjectId }) => { // Accept subjectId as a prop
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
         <DialogTitle>{editTipData ? 'Edit Study Tip' : 'Add Study Tip'}</DialogTitle>
         <DialogContent>
-            {editTipData ? (
-              <EditStudyTip tipData={editTipData} onClose={handleCloseDialog} />
-            ) : (
-              <CreateStudyTip subjectId={subjectId} onClose={handleCloseDialog} />
-            )}
+          {editTipData ? (
+            <EditStudyTip tipData={editTipData} onClose={handleCloseDialog} /> // Render EditStudyTip component
+          ) : (
+            <CreateStudyTip subjectId={subjectId} onClose={handleCloseDialog} /> // Render CreateStudyTip component
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
@@ -143,30 +141,29 @@ const StudyTip = ({ subjectId }) => { // Accept subjectId as a prop
         </DialogActions>
       </Dialog>
 
-      {/* Table for displaying study tips */}
-
-        { loading ? <p>Loading data...</p>:
+      {/* Render loading state or the data table */}
+      {loading ? (
+        <p>Loading data...</p> // Show loading message if data is being fetched
+      ) : (
         <MaterialReactTable
-            columns={columns} 
-            data={myData}
-            enableRowActions
-            renderRowActions={({row}) => (
-              <Box sx={{ display: 'flex', flexWrap: 'nowrap', gap: '8px' }}>
-
-                <IconButton color="secondary" onClick={() => handleEditClick(row)}>
-                  <EditIcon />
-                </IconButton>
-
-                <IconButton color="error" onClick={() => handleOpenConfirmDialog(row)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            )}
-            
-            />
-        }
+          columns={columns} // Pass defined columns
+          data={myData} // Pass fetched data
+          enableRowActions // Enable row actions for edit/delete
+          renderRowActions={({ row }) => (
+            <Box sx={{ display: 'flex', flexWrap: 'nowrap', gap: '8px' }}>
+              <IconButton color="secondary" onClick={() => handleEditClick(row)}>
+                <EditIcon /> {/* Edit button */}
+              </IconButton>
+              <IconButton color="error" onClick={() => handleOpenConfirmDialog(row)}>
+                <DeleteIcon /> {/* Delete button */}
+              </IconButton>
+            </Box>
+          )}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default StudyTip
+// Export the StudyTip component as the default export
+export default StudyTip;
