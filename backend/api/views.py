@@ -107,7 +107,9 @@ class StudySessionViewset(viewsets.ViewSet):
             if user.is_anonymous:
                 return JsonResponse({"error": "Authentication required."}, status=401)
 
-            sessions, progress = get_study_data(user)  # Retrieve study data
+            # Unpack the values returned from get_study_data
+            sessions, progress, average_durations = get_study_data(user)  # Retrieve study data
+
             data = preprocess_data(sessions, progress)  # Preprocess the data
             subject = get_object_or_404(Subject, pk=pk)  # Get the subject
             
@@ -117,14 +119,16 @@ class StudySessionViewset(viewsets.ViewSet):
             total_minutes_studied = Progress.objects.filter(subject=subject).first().total_minutes_studied or 0
             
             # Get the last session time
-            session_time = max((session['session_date'] for session in sessions), default=timezone.now())
+            session_time = max((session['session_date'] for session in sessions))
             model = train_model(data)  # Train the model
             suggestion = generate_study_tip(model, subject, duration_minutes, total_minutes_studied, session_time)  # Generate study tip
+            
             return JsonResponse({"suggestion": suggestion})
 
         except Exception as e:
             print(f"Error occurred: {str(e)}")
             return JsonResponse({"error": "Internal server error."}, status=500)
+
 
 
 # Viewset for handling progress tracking

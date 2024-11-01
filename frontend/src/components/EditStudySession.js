@@ -8,10 +8,6 @@ import AxiosInstance from './Axios';  // Import the Axios instance for API calls
 import Dayjs from 'dayjs';  // Import dayjs for date manipulation
 import { yupResolver } from '@hookform/resolvers/yup';  // Import yupResolver for form validation
 import * as yup from 'yup';  // Import yup for schema validation
-import timezone from 'dayjs/plugin/timezone';  // Import timezone plugin for dayjs
-import utc from 'dayjs/plugin/utc';  // Import UTC plugin for dayjs
-Dayjs.extend(utc);  // Extend dayjs to use UTC functionality
-Dayjs.extend(timezone);  // Extend dayjs to use timezone functionality
 
 // Define the EditStudySession component
 const EditStudySession = ({ sessionData, onClose }) => {  // Receive sessionData and onClose prop
