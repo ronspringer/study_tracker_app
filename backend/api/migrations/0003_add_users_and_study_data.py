@@ -33,23 +33,25 @@ def create_initial_data(apps, schema_editor):
         for i in range(num_records):
             session_hour = random.randint(start_hour, end_hour - 1)
             session_duration = random.randint(min_duration, max_duration)
-            
-            # Adjust to user's timezone (UTC+4)
-            session_datetime = timezone.make_aware(datetime(
-                start_date.year, start_date.month, start_date.day, session_hour, 0
-            )) + timedelta(days=i) + timedelta(hours=4)  # Adjust for UTC+4
-            
-            StudySession.objects.create(
-                subject=subject,
-                session_date=session_datetime,
-                duration_minutes=session_duration,
-                notes=f'{subject.subject_name} session'
-            )
 
-    # Create 100 sessions for each subject
-    create_sessions(math, start_hour=6, end_hour=12, min_duration=20, max_duration=30, num_records=100)
-    create_sessions(history, start_hour=12, end_hour=18, min_duration=30, max_duration=45, num_records=100)
-    create_sessions(biology, start_hour=0, end_hour=6, min_duration=50, max_duration=60, num_records=100)
+            # Randomly decide whether to create a session (simulate attendance)
+            if random.random() < 0.8:  # 80% chance of attending the session
+                # Adjust to user's timezone (UTC+4)
+                session_datetime = timezone.make_aware(datetime(
+                    start_date.year, start_date.month, start_date.day, session_hour, 0
+                )) + timedelta(days=i) + timedelta(hours=4)  # Adjust for UTC+4
+                
+                StudySession.objects.create(
+                    subject=subject,
+                    session_date=session_datetime,
+                    duration_minutes=session_duration,
+                    notes=f'{subject.subject_name} session'
+                )
+
+    # Create 150 sessions for each subject with adjusted parameters
+    create_sessions(math, start_hour=6, end_hour=12, min_duration=25, max_duration=30, num_records=20)
+    create_sessions(history, start_hour=12, end_hour=18, min_duration=40, max_duration=45, num_records=20)
+    create_sessions(biology, start_hour=0, end_hour=6, min_duration=50, max_duration=60, num_records=20)
 
 class Migration(migrations.Migration):
 

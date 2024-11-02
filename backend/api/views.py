@@ -98,8 +98,9 @@ class StudySessionViewset(viewsets.ViewSet):
         session = get_object_or_404(self.queryset, pk=pk)
         session.delete()
         return Response(status=204)
+    
 
-    # Generate a study suggestion based on user data and model predictions
+    # Action to get a study suggestion
     @action(detail=True, methods=['get'], url_path='get_study_suggestion')
     def get_study_suggestion(self, request, pk=None):
         try:
@@ -107,28 +108,42 @@ class StudySessionViewset(viewsets.ViewSet):
             if user.is_anonymous:
                 return JsonResponse({"error": "Authentication required."}, status=401)
 
-            # Unpack the values returned from get_study_data
-            sessions, progress, average_durations = get_study_data(user)  # Retrieve study data
+            # Retrieve study data for the user
+            sessions, progress, average_durations = get_study_data(user)
+            if not sessions or not progress:
+                return JsonResponse({"error": "No study data available for the user."}, status=404)
 
-            data = preprocess_data(sessions, progress)  # Preprocess the data
-            subject = get_object_or_404(Subject, pk=pk)  # Get the subject
+            # Preprocess the data for model training
+            data = preprocess_data(sessions, progress)
+
+            # Get the specific subject or return 404 if not found
+            subject = get_object_or_404(Subject, pk=pk)
             
-            # Calculate duration and total minutes studied
-            sessions = StudySession.objects.filter(subject=subject).values('session_date', 'duration_minutes')
-            duration_minutes = sum(session['duration_minutes'] for session in sessions)
+            # Calculate the total session duration and total minutes studied for the subject
+            subject_sessions = StudySession.objects.filter(subject=subject)
+            duration_minutes = sum(session.duration_minutes for session in subject_sessions)
             total_minutes_studied = Progress.objects.filter(subject=subject).first().total_minutes_studied or 0
             
-            # Get the last session time
-            session_time = max((session['session_date'] for session in sessions))
-            model = train_model(data)  # Train the model
-            suggestion = generate_study_tip(model, subject, duration_minutes, total_minutes_studied, session_time)  # Generate study tip
+            # Get the most recent session time
+            latest_session = subject_sessions.order_by('-session_date').first()
+            session_time = latest_session.session_date if latest_session else None
+
+            # If no session time, return an error
+            if not session_time:
+                return JsonResponse({"error": "No session data available for this subject."}, status=404)
+
+            # Train the model once with the preprocessed data
+            model = train_model(data)
+
+            # Get the average duration for the subject to generate the suggestion
+            average_duration = average_durations.get(subject.id, 0)
+            suggestion = generate_study_tip(model, subject, duration_minutes, total_minutes_studied, session_time, average_duration)
             
             return JsonResponse({"suggestion": suggestion})
 
         except Exception as e:
             print(f"Error occurred: {str(e)}")
             return JsonResponse({"error": "Internal server error."}, status=500)
-
 
 
 # Viewset for handling progress tracking
