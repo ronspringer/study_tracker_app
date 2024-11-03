@@ -49,9 +49,9 @@ def create_initial_data(apps, schema_editor):
                 )
 
     # Create 150 sessions for each subject with adjusted parameters
-    create_sessions(math, start_hour=6, end_hour=12, min_duration=25, max_duration=30, num_records=20)
-    create_sessions(history, start_hour=12, end_hour=18, min_duration=40, max_duration=45, num_records=20)
-    create_sessions(biology, start_hour=0, end_hour=6, min_duration=50, max_duration=60, num_records=20)
+    create_sessions(math, start_hour=6, end_hour=12, min_duration=25, max_duration=30, num_records=200)
+    create_sessions(history, start_hour=12, end_hour=18, min_duration=40, max_duration=45, num_records=200)
+    create_sessions(biology, start_hour=0, end_hour=6, min_duration=50, max_duration=60, num_records=200)
 
 class Migration(migrations.Migration):
 

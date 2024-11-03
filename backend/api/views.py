@@ -109,7 +109,7 @@ class StudySessionViewset(viewsets.ViewSet):
                 return JsonResponse({"error": "Authentication required."}, status=401)
 
             # Retrieve study data for the user
-            sessions, progress, average_durations = get_study_data(user)
+            sessions, progress = get_study_data(user)
             if not sessions or not progress:
                 return JsonResponse({"error": "No study data available for the user."}, status=404)
 
@@ -121,7 +121,6 @@ class StudySessionViewset(viewsets.ViewSet):
             
             # Calculate the total session duration and total minutes studied for the subject
             subject_sessions = StudySession.objects.filter(subject=subject)
-            duration_minutes = sum(session.duration_minutes for session in subject_sessions)
             total_minutes_studied = Progress.objects.filter(subject=subject).first().total_minutes_studied or 0
             
             # Get the most recent session time
@@ -135,9 +134,7 @@ class StudySessionViewset(viewsets.ViewSet):
             # Train the model once with the preprocessed data
             model = train_model(data)
 
-            # Get the average duration for the subject to generate the suggestion
-            average_duration = average_durations.get(subject.id, 0)
-            suggestion = generate_study_tip(model, subject, duration_minutes, total_minutes_studied, session_time, average_duration)
+            suggestion = generate_study_tip(model, subject, total_minutes_studied, session_time)
             
             return JsonResponse({"suggestion": suggestion})
 
