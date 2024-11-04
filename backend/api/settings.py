@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-bge41y_&3jbuqg6=ol0%%*j1*t*5fr7(&mznuf*a04f%ia1i57
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',  # Allow local development
+    '127.0.0.1',  # Allow local development
+    'backend-image-238886609739.us-central1.run.app',  # Your Cloud Run URL
+]
+
 
 
 # Application definition

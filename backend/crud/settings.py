@@ -13,7 +13,11 @@ SECRET_KEY = 'django-insecure-k)z!25bklwd#lrug&rhnt^p5itsermmtmn9z2p+#8tu=-06!@v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',  # Allow local development
+    '127.0.0.1',  # Allow local development
+    'backend-image-238886609739.us-central1.run.app',  # Your Cloud Run URL
+]
 
 
 # Application definition
@@ -46,7 +50,8 @@ MIDDLEWARE = [
 
 # List of allowed origins for CORS (Cross-Origin Resource Sharing)
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000'  # Allow requests from this origin
+    'http://localhost:3000',  # Allow requests from this origin
+    'https://frontend-image-238886609739.us-central1.run.app',
 ]
 
 ROOT_URLCONF = 'crud.urls'
